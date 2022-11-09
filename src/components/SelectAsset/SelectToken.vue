@@ -64,7 +64,6 @@ import SelectAssetMixin from '@/components/mixins/SelectAssetMixin';
 import { Components, ObjectInit } from '@/consts';
 import { lazyComponent } from '@/router';
 import { getter, state, action } from '@/store/decorators';
-import { XOR, XSTUSD } from '@sora-substrate/util/build/assets/consts';
 
 enum Tabs {
   Assets = 'assets',
@@ -113,8 +112,7 @@ export default class SelectToken extends Mixins(TranslationMixin, SelectAssetMix
   }
 
   get whitelistAssetsList(): Array<AccountAsset> {
-    const whiteList = this.isMainTokenProviders ? this.getMainSources() : this.whitelistAssets;
-
+    const whiteList = this.isMainTokenProviders ? this.baseAssets : this.whitelistAssets;
     const { asset: excludeAsset, accountAssetsAddressTable, notNullBalanceOnly, accountAssetsOnly } = this;
 
     return this.getAssetsWithBalances({
@@ -158,10 +156,10 @@ export default class SelectToken extends Mixins(TranslationMixin, SelectAssetMix
     return Object.values(this.nonWhitelistAccountAssets).sort(this.sortByBalance());
   }
 
-  private getMainSources(): Array<Asset> {
-    const mainSourceAddresses = [XOR.address, XSTUSD.address];
+  get baseAssets(): Array<Asset> {
+    const baseAssetsIds = api.dex.baseAssetsIds;
 
-    return this.whitelistAssets.filter((asset) => mainSourceAddresses.includes(asset.address));
+    return this.whitelistAssets.filter((asset) => baseAssetsIds.includes(asset.address));
   }
 
   async handleAddAsset(): Promise<void> {

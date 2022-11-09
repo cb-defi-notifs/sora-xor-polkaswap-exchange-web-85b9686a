@@ -9,7 +9,7 @@
     <s-form class="el-form--actions" :show-message="false">
       <token-input
         :balance="getTokenBalance(firstToken)"
-        is-select-available
+        :is-select-available="firstTokenSelectAvailable"
         :is-max-available="isFirstMaxButtonAvailable"
         :title="t('createPair.deposit')"
         :token="firstToken"
@@ -113,7 +113,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator';
-import { components, mixins } from '@soramitsu/soraneo-wallet-web';
+import { api, components, mixins } from '@soramitsu/soraneo-wallet-web';
 import { FPNumber, Operation } from '@sora-substrate/util';
 import { XOR } from '@sora-substrate/util/build/assets/consts';
 import type { CodecString } from '@sora-substrate/util';
@@ -207,6 +207,10 @@ export default class AddLiquidity extends Mixins(
   destroyed(): void {
     this.resetPrices();
     this.resetData();
+  }
+
+  get firstTokenSelectAvailable(): boolean {
+    return api.dex.baseAssetsIds.length > 1;
   }
 
   get firstAddress(): string {
