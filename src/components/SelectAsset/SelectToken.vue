@@ -157,7 +157,7 @@ export default class SelectToken extends Mixins(TranslationMixin, SelectAssetMix
   }
 
   get baseAssets(): Array<Asset> {
-    const baseAssetsIds = api.dex.baseAssetsIds;
+    const baseAssetsIds = api.dex.poolBaseAssetsIds;
 
     return this.whitelistAssets.filter((asset) => baseAssetsIds.includes(asset.address));
   }

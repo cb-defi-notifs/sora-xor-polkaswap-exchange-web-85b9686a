@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="parentLoading" class="container">
+  <div v-loading="loading || parentLoading" class="container">
     <generic-page-header
       has-button-back
       :title="t('addLiquidity.title')"
@@ -19,7 +19,7 @@
         @focus="setFocusedField('firstTokenValue')"
         @blur="resetFocusedField"
         @max="handleAddLiquidityMaxValue($event, setFirstTokenValue)"
-        @select="openSelectTokenDialog(true)"
+        @select="firstTokenSelectAvailable ? openSelectTokenDialog(true) : undefined"
       />
 
       <s-icon class="icon-divider" name="plus-16" />
@@ -187,20 +187,22 @@ export default class AddLiquidity extends Mixins(
     }
   }
 
-  async mounted(): Promise<void> {
-    await this.withParentLoading(async () => {
-      if (this.firstAddress && this.secondAddress) {
-        await this.setData({
-          firstAddress: this.firstAddress,
-          secondAddress: this.secondAddress,
-        });
-        // If user don't have the liquidity (navigated through the address bar) redirect to the Pool page
-        if (!this.liquidityInfo) {
-          return this.handleBack();
+  async created(): Promise<void> {
+    await this.withLoading(async () => {
+      await this.withParentLoading(async () => {
+        if (this.firstAddress && this.secondAddress) {
+          await this.setData({
+            firstAddress: this.firstAddress,
+            secondAddress: this.secondAddress,
+          });
+          // If user don't have the liquidity (navigated through the address bar) redirect to the Pool page
+          if (!this.liquidityInfo) {
+            return this.handleBack();
+          }
+        } else {
+          await this.setFirstTokenAddress(XOR.address);
         }
-      } else {
-        await this.setFirstTokenAddress(XOR.address);
-      }
+      });
     });
   }
 
@@ -210,7 +212,7 @@ export default class AddLiquidity extends Mixins(
   }
 
   get firstTokenSelectAvailable(): boolean {
-    return api.dex.baseAssetsIds.length > 1;
+    return api.dex.poolBaseAssetsIds.length > 1;
   }
 
   get firstAddress(): string {
